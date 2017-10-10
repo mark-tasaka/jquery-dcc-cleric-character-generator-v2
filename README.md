@@ -1,0 +1,2 @@
+# jquery-dcc-cleric-character-generator-v2
+An updated version of the Dungeon Crawl Classics Cleric character class random character generator.  While the previous version of the Cleric Character Generator used the JavaScript DOM, this iteration of the Cleric Generator utilizes jQuery.  As well, the random data used in generator is stored in internal JSON.  Dungeon Crawl Classics is a pen and paper fantasy role-playing game developed by Goodman Games.  
