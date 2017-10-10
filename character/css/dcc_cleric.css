@@ -1,0 +1,355 @@
+/*
+Dungeon Crawl Classics Cleric Character Class Random Generator
+Designed by Mark Tasaka 2016
+*/
+
+body{
+	font-family: sans-serif;
+	font-size: 1.5em;
+	font-weight: bold;
+}
+
+#character_sheet{
+	width: 950px;
+    height: auto;
+	display: block;
+}
+
+#name{
+    position: absolute;
+    top: 155px;
+    left: 90px;
+	font-size: 1.2em;
+}
+
+#occupation{
+    position: absolute;
+    top: 160px;
+    left: 270px;
+	font-size: 1.1em;
+}
+
+
+#alignment{
+    position: absolute;
+    top: 160px;
+    left: 530px;
+	font-size: 1.1em;
+}
+
+
+#title{
+    position: absolute;
+    top: 285px;
+    left: 200px;
+	font-size: 1.2em;
+}
+
+#level{
+    position: absolute;
+    top: 285px;
+    left: 85px;
+	font-size: 1.2em;
+}
+
+#layOnHandsLaw{
+    position: absolute;
+    top: 695px;
+    left:700px;
+	font-size: 0.8em;
+}
+
+#layOnHandsNeutral{
+    position: absolute;
+    top: 695px;
+    left:780px;
+	font-size: 0.8em;
+}
+
+#layOnHandsChaos{
+    position: absolute;
+    top: 695px;
+    left:860px;
+	font-size: 0.8em;
+}
+
+#luckySignDescription{
+    position: absolute;
+    top: 815px;
+    left: 610px;
+	font-size: 0.6em;
+	width: 310px;
+}
+
+
+
+#baseArmourClass{
+    position: absolute;
+    top: 400px;
+    left: 167px;
+	font-size: 2em;
+}
+
+
+#hitPoints{
+	position: absolute;
+    top: 550px;
+    left: 185px;
+	font-size: 1.8em;
+}
+
+#strength{
+    position:absolute;
+    top: 350px;
+    left: 430px;
+	font-size: 1.6em;
+}
+
+#strengthMod{
+    position:absolute;
+    top: 350px;
+    left: 500px;
+	font-size: 1.6em;
+}
+
+#agility{
+    position:absolute;
+    top: 394px;
+    left: 430px;
+	font-size: 1.6em;
+}
+
+#agilityMod{
+    position:absolute;
+    top: 394px;
+    left: 500px;
+	font-size: 1.6em;
+}
+
+#stamina{
+    position:absolute;
+    top: 438px;
+    left: 430px;
+	font-size: 1.6em;
+}
+
+#staminaMod{
+    position:absolute;
+    top: 438px;
+    left: 500px;
+	font-size: 1.6em;
+}
+
+#personality{
+    position:absolute;
+    top: 482px;
+    left: 430px;
+	font-size: 1.6em;
+}
+
+#personalityMod{
+    position:absolute;
+    top: 482px;
+    left: 500px;
+	font-size: 1.6em;
+}
+
+#intelligence{
+    position:absolute;
+    top: 526px;
+    left: 430px;
+	font-size: 1.6em;
+}
+
+#intelligenceMod{
+    position:absolute;
+    top: 526px;
+    left: 500px;
+	font-size: 1.6em;
+}
+
+#luck{
+    position:absolute;
+    top: 570px;
+    left: 430px;
+	font-size: 1.6em;
+}
+
+#luckMod{
+    position:absolute;
+    top: 570px;
+    left: 500px;
+	font-size: 1.6em;
+}
+
+
+#languages{
+    position: absolute;
+    top: 1130px;
+    left: 515px;
+	font-size: 0.65em;
+	width: 380px;
+}
+
+
+#clericGod{
+    position: absolute;
+    top: 950px;
+    left: 530px;
+	width: 380px;
+	font-size: 0.75em;
+}
+
+
+#holyWeapons{
+    position: absolute;
+    top: 1016px;
+    left: 530px;
+	width: 380px;
+	font-size: 0.75em;
+}
+
+#unholyCreatures{
+    position: absolute;
+    top: 1065px;
+    left: 526px;
+	width: 400px;
+	font-size: 0.6em;
+}
+
+
+#zeroWeapon{
+    position: absolute;
+    top: 912px;
+    left: 610px;
+	font-size: 0.75em;
+}
+
+#fumbleDie{
+    position: absolute;
+    top: 365px;
+    left:  640px;
+	font-size: 1.3em;
+}
+
+
+
+#init{
+    position: absolute;
+    top: 635px;
+    left:  500px;
+	font-size: 1.6em;
+}
+
+
+#speed{
+    position: absolute;
+    top: 680px;
+    left:  500px;
+	font-size: 1.6em;
+}
+
+#melee{
+    position: absolute;
+    top: 725px;
+    left:  500px;
+	font-size: 1.6em;
+}
+
+
+#range{
+    position: absolute;
+    top: 770px;
+    left:  500px;
+	font-size: 1.6em;
+}
+
+
+#ref{
+    position: absolute;
+    top: 810px;
+    left:  500px;
+	font-size: 1.6em;
+}
+
+#fort{
+    position: absolute;
+    top: 854px;
+    left:  500px;
+	font-size: 1.6em;
+}
+
+#will{
+    position: absolute;
+    top: 897px;
+    left:  500px;
+	font-size: 1.6em;
+}
+
+
+#actionDie{
+    position: absolute;
+    top: 285px;
+    left:  490px;
+	font-size: 1.2em;
+}
+
+
+#critDie{
+    position: absolute;
+    top: 285px;
+    left:  690px;
+	font-size: 1.2em;
+}
+
+#critTable{
+    position: absolute;
+    top: 280px;
+    left:  860px;
+	font-family: serif;
+	font-size: 1.6em;
+}
+
+#spellCheck{
+    position: absolute;
+    top: 536px;
+    left:  750px;
+	font-size: 1.2em;
+}
+
+
+#level1Spells{
+    position: absolute;
+    top: 500px;
+    left:  690px;
+	font-size: 1.2em;
+}
+
+
+#level2Spells{
+    position: absolute;
+    top: 500px;
+    left:  745px;
+	font-size: 1.2em;
+}
+
+#level3Spells{
+    position: absolute;
+    top: 500px;
+    left:  795px;
+	font-size: 1.2em;
+}
+
+#level4Spells{
+    position: absolute;
+    top: 500px;
+    left:  848px;
+	font-size: 1.2em;
+}
+
+#level5Spells{
+    position: absolute;
+    top: 500px;
+    left:  899px;
+	font-size: 1.2em;
+}

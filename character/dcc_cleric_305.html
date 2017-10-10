@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dungeon Crawl Classics Chaos Cleric Character Generator</title>
+    
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
+	<meta charset="UTF-8">
+	<meta name="description" content="Dungeon Crawl Classics cleric Character Generator. Goodman Games.">
+	<meta name="keywords" content="Dungeon Crawl Classics, Goodman Games,HTML5,CSS,JavaScript">
+	<meta name="author" content="Mark Tasaka 2016">
+	<link rel="stylesheet" type="text/css" href="css/dcc_cleric.css">
+	
+</head>
+<body>
+	
+
+	
+   
+  <img id="character_sheet"/>
+   <section>
+    	<p id="name"></p>
+	
+		<span id="strength"></span> <span id="strengthMod"></span>
+		<span id="agility"></span>  <span id="agilityMod"></span>
+		<span id="stamina"></span>  <span id="staminaMod"></span>
+		<span id="personality"></span> <span id="personalityMod"></span>
+		<span id="intelligence"></span> <span id="intelligenceMod"></span>
+		<span id="luck"></span> <span id="luckMod"></span>
+
+    	<p id="occupation"></p>
+	   
+	   <p id="alignment"></p>
+
+	   <p id="luckySignDescription"><span id="luckySignNotes"></span>: <span id="luckyRoll"></span> (Bonus: <span id="luckySignBonus"></span>)</p>
+	   
+	   
+	   <P id="languages"><span id="baseLanguages"></span><span id="bonusLanguages"></span></P>
+	   
+	   <p id="clericGod"></p>
+	   <span id="holyWeapons"></span>
+	   <span id="unholyCreatures"></span>
+	   
+		<span id="baseArmourClass"></span>
+	   
+	   <span id="level"></span>
+			 
+	  <span id="title"></span>
+	  <span id="hitPoints"></span>
+	   <span id="zeroWeapon"></span>
+	   <span id="fumbleDie"></span>
+	   <span id="init"></span>
+	   <span id="speed"></span>	 
+	   <span id="melee"></span>	 	
+	   <span id="range"></span>	  
+	   
+	   <span id="ref"></span>
+	   <span id="fort"></span>
+	   <span id="will"></span>
+	   
+	   <span id="layOnHandsLaw"></span>
+	   <span id="layOnHandsNeutral"></span>
+	   <span id="layOnHandsChaos"></span>
+	   
+	   
+	   <span id="actionDie"></span>
+	   <span id="critDie"></span>
+	   <span id="critTable"></span>
+	   
+	   <span id="spellCheck"></span>
+	   <span id="level1Spells"></span>
+	   <span id="level2Spells"></span>
+	   <span id="level3Spells"></span>
+	   <span id="level4Spells"></span>
+	   <span id="level5Spells"></span>
+
+	</section>
+	
+
+		
+  <script>
+	  
+	  /*
+	  rollDice (numberOfSides, numberOfDiceRolled, numberOfDiceRemoved, baseValue)
+	  */
+	  	function rollDice(numberOfSides, numberOfDiceRolled, numberOfDiceRemoved, baseValue) {
+		
+		if(numberOfSides === undefined || typeof numberOfSides !== 'number'||numberOfSides <=2 || numberOfSides >=30){
+			numberOfSides = 6;
+		}
+		
+		if(numberOfDiceRolled < 0){
+			numberOfDiceRolled =2;
+		}
+		
+		if(numberOfDiceRemoved === undefined || typeof numberOfDiceRemoved !== 'number'||numberOfDiceRemoved >= numberOfDiceRolled){
+			numberOfDiceRemoved =0;
+		}
+		
+		if(baseValue === undefined || typeof baseValue !== 'number'||baseValue < 0){
+			baseValue = 0;
+		}
+		
+		var numbers = [];
+		
+
+		for(var i = 0; i < numberOfDiceRolled; i++){
+			numbers[i] = Math.floor((Math.random() * 6) + 1);
+		}
+		
+        numbers.sort();
+        
+		var sum = baseValue;
+			
+		for(var i = numberOfDiceRemoved; i < numberOfDiceRolled; i++){
+			sum += numbers[i];
+		}
+			
+		return sum ;
+	}
+
+	  
+	/*
+	 Character() - cleric Character Constructor
+	*/
+	function Character() {
+    var strength = rollDice(6, 4, 1, 0);
+    var agility = rollDice(6, 4, 1, 0);
+    var stamina = rollDice(6, 4, 1, 0);
+    var	personality = rollDice(8, 1, 0, 12);
+    var	intelligence = rollDice(6, 4, 1, 0);
+    var	luck = rollDice(6, 4, 1, 0);
+	var	occupation = getOccupation();
+	var birthAugur = getLuckySign();
+	var strengthModifier = getStrengthModifier(strength);
+	var staminaModifier = getStaminaModifier(stamina);
+	var agilityModifier = getAgilityModifier(agility);
+	var personalityModifier = getPersonalityModifier(personality);
+	var intelligenceModifier = getIntelligenceModifier(intelligence);
+	var luckModifier = getLuckModifier(luck);
+	var god = addGod();
+	var baseAC = getBaseArmourClass(agilityModifier) + adjustAC(birthAugur, luckModifier);
+	var cleric = getCleric();
+
+		var clericGenerator = {
+			"name": "",
+			"strength": strength,
+			"agility": agility,
+			"stamina": stamina,
+			"personality": personality,
+			"intelligence": intelligence,
+			"luck": luck,
+			"strengthModifier": strengthModifier,
+			"agilityModifier": agilityModifier,
+			"staminaModifier": staminaModifier,
+			"personalityModifier": personalityModifier,
+			"intelligenceModifier": intelligenceModifier,
+			"luckModifier":  luckModifier,
+			"occupation":  occupation.occupation,
+			"luckySign": birthAugur.luckySign,
+			"luckyRoll": birthAugur.luckyRoll,
+			"luckySignBonus": luckModifier,
+			"baseLanguages": "Common", 
+			"bonusLanguages": getBonusLanguages (intelligenceModifier, birthAugur, luckModifier),
+			"clericGod": god.god + ": " + god.domain,
+			"holyWeapons": "Axe (any), bow (any), dagger, dart & flail",
+			"unholyCreatures": "Angels, Paladins, Lawful Dragons, Lords of Law, Lawful Primes & Law-Aligned Humaniods (e.g. goblins)",
+			"baseArmourClass": baseAC,
+			"alignment": "Chaos",
+			"level": cleric.level,
+			"title": cleric.title,
+			"hitPoints": hitPoints (cleric, staminaModifier, hitPointAdjustPerLevel(birthAugur, luckModifier)),
+			"zeroWeapon": occupation.trainedWeapon,
+			"fumbleDie": "d4" + addSign(adjustFumble(birthAugur, luckModifier)),
+			"init": agilityModifier + adjustInit(birthAugur, luckModifier),
+			"speed": 30 + addLuckToSpeed(birthAugur, luckModifier) + "'",
+			"melee": cleric.attackBonus + strengthModifier + meleeAdjust(birthAugur, luckModifier),
+			"range": cleric.attackBonus + agilityModifier + rangeAdjust(birthAugur, luckModifier),
+			"ref": cleric.ref + agilityModifier + adjustRef(birthAugur, luckModifier),
+			"fort": cleric.fort + staminaModifier + adjustFort(birthAugur,luckModifier),
+			"will": cleric.will + personalityModifier + adjustWill(birthAugur, luckModifier),
+			"actionDie": cleric.actionDice,
+			"critDie": cleric.critDie + "" + addSign(adjustCrit(birthAugur, luckModifier)),
+			"critTable": cleric.critTable,
+			"layOnHandsLaw": "1 dice<br/>1 dice<br/>2 dice<br/>3 dice",
+			"layOnHandsNeutral": "1 dice<br/>2 dice<br/>3 dice<br/>4 dice",
+			"layOnHandsChaos": "2 dice<br/>3 dice<br/>4 dice<br/>5 dice",
+			"spellCheck": "1d20" + "" + addSign(personalityModifier + cleric.level + adjustSpellCheck(birthAugur, luckModifier)),
+			"level1Spells": cleric.spells1,
+			"level2Spells": cleric.spells2,
+			"level3Spells": cleric.spells3,
+			"level4Spells": cleric.spells4,
+			"level5Spells": cleric.spells5
+
+		}; 
+		return clericGenerator;
+	  
+	  }
+	  
+
+    
+     //getStrengthModifier(strength) - returns the Strength Modifier, which is based on the Strength Score
+    
+    function getStrengthModifier(strength){
+        if(strength === undefined || typeof strength !== 'number'|| strength <=2 || strength >=19){
+            //invalid
+            return -3;
+        }
+		if(strength >=4 && strength <=5){
+			return -2;
+		}
+		else if(strength >=6 && strength <=8){
+			return -1;
+		}
+		else if(strength >=9 && strength <=12){
+			return + 0;
+		}
+		else if(strength >=13 && strength <=15){
+			return + 1;
+		}	
+		else if(strength >=16 && strength <=17){
+			return + 2;
+		}		
+		else if(strength ==18){
+			return + 3;
+		}	
+		return -3;
+	}
+
+
+    
+    // getAgilityModifier(agility) - returns the Agility Modifier, which is based on the Agility Score
+    
+    function getAgilityModifier(agility){
+        if(agility === undefined || typeof agility !== 'number'|| agility <=2 || agility >=19){
+            //invalid
+            return -3;
+        }
+		if(agility >=4 && agility <=5){
+			return -2;
+		}
+		else if(agility >=6 && agility <=8){
+			return -1;
+		}
+		else if(agility >=9 && agility <=12){
+			return 0;
+		}
+		else if(agility >=13 && agility <=15){
+			return 1;
+		}	
+		else if(agility >=16 && agility <=17){
+			return 2;
+		}		
+		else if(agility ==18){
+			return 3;
+		}	
+		return -3;
+	}
+
+    //getStaminaModifier(stamina) - returns the Stamina Modifier, which is based on the Stamina Score
+    function getStaminaModifier(stamina){
+        if(stamina === undefined || typeof stamina !== 'number'|| stamina <=2 || stamina >=19){
+            //invalid
+            return -3;
+        }
+		if(stamina >=4 && stamina <=5){
+			return -2;
+		}
+		else if(stamina >=6 && stamina <=8){
+			return -1;
+		}
+		else if(stamina >=9 && stamina <=12){
+			return + 0;
+		}
+		else if(stamina >=13 && stamina <=15){
+			return + 1;
+		}	
+		else if(stamina >=16 && stamina <=17){
+			return + 2;
+		}		
+		else if(stamina ==18){
+			return + 3;
+		}	
+		return -3;
+	}
+
+    
+    //getPersonalityModifier(personality) - returns the Personality Modifier, which is based on the Personality Score
+    function getPersonalityModifier(personality){
+        if(personality === undefined || typeof personality !== 'number'|| personality <=2 || personality >=19){
+            //invalid
+            return -3;
+        }
+		if(personality >=4 && personality <=5){
+			return -2;
+		}
+		else if(personality >=6 && personality <=8){
+			return -1;
+		}
+		else if(personality >=9 && personality <=12){
+			return + 0;
+		}
+		else if(personality >=13 && personality <=15){
+			return + 1;
+		}	
+		else if(personality >=16 && personality <=17){
+			return + 2;
+		}		
+		else if(personality ==18){
+			return + 3;
+		}	
+		return -3;
+	}
+
+    
+    //getIntelligenceModifier(intelligence) - returns the Intelligence Modifier, which is based on the Intelligence Score 
+    function getIntelligenceModifier(intelligence){
+        if(intelligence === undefined || typeof intelligence !== 'number'|| intelligence <=2 || intelligence >=19){
+            //invalid
+            return -3;
+        }
+		if(intelligence >=4 && intelligence <=5){
+			return -2;
+		}
+		else if(intelligence >=6 && intelligence <=8){
+			return -1;
+		}
+		else if(intelligence >=9 && intelligence <=12){
+			return + 0;
+		}
+		else if(intelligence >=13 && intelligence <=15){
+			return + 1;
+		}	
+		else if(intelligence >=16 && intelligence <=17){
+			return + 2;
+		}		
+		else if(intelligence ==18){
+			return + 3;
+		}	
+		return -3;
+	}
+
+    
+    // getLuckModifier(luck) - returns the luck Modifier, which is based on the luck Score
+    
+    function getLuckModifier(luck){
+        if(luck === undefined || typeof luck !== 'number'|| luck <=2 || luck >=19){
+            //invalid
+            return -3;
+        }
+		if(luck >=4 && luck <=5){
+			return -2;
+		}
+		else if(luck >=6 && luck <=8){
+			return -1;
+		}
+		else if(luck >=9 && luck <=12){
+			return + 0;
+		}
+		else if(luck >=13 && luck <=15){
+			return + 1;
+		}	
+		else if(luck >=16 && luck <=17){
+			return + 2;
+		}		
+		else if(luck ==18){
+			return + 3;
+		}	
+		return -3;
+	}
+	  
+ 
+//  getOccupation() - returns the Randomly Generated Occupation
+function getOccupation(){
+	var occupations = [
+		//Dwarves 0 - 10
+		// 4 - Herder
+		//Humans 31 -
+		//Humans 31 - 40 Alchemist to Caravan Guard
+		// 32 - Animal Trainer
+		{"occupation": "Alchemist", "race": "Human", "trainedWeapon": "Staff", "damage": "1d4", "tradeGoods": "Oil, 1 flask"},
+		{"occupation": "Animal Trainer", "race": "Human", "trainedWeapon": "Club", "damage": "1d4", "tradeGoods": "Pony (see notes)"},
+		{"occupation": "Armourer", "race": "Human", "trainedWeapon": "Hammer (as Club)", "damage": "1d4", "tradeGoods": "Iron Helmet"},
+		{"occupation": "Astrologer", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Spyglass"},
+		{"occupation": "Barber", "race": "Human", "trainedWeapon": "Razor (as Dagger)", "damage": "1d4", "tradeGoods": "Scissors (as Dagger)"},
+		{"occupation": "Beadle", "race": "Human", "trainedWeapon": "Staff", "damage": "1d4", "tradeGoods": "Holy Symbol"},
+		{"occupation": "Beekeeper", "race": "Human", "trainedWeapon": "Hammer (as club)", "damage": "1d4", "tradeGoods": "Jar of Honey"},
+		{"occupation": "Blacksmith", "race": "Human", "trainedWeapon": "Hammer (as Club)", "damage": "1d4", "tradeGoods": "Steel Tongs"},
+		{"occupation": "Butcher", "race": "Human", "trainedWeapon": "Cleaver (as axe)", "damage": "1d6", "tradeGoods": "Side of Beef"},
+		{"occupation": "Caravan Guard", "race": "Human", "trainedWeapon": "Short Sword", "damage": "1d6", "tradeGoods": "Linen, 1 Yard"},
+		// Humans 41 - 47 Cheesemaker to Ditchdigger
+		{"occupation": "Cheesemaker", "race": "Human", "trainedWeapon": "Cudgel (as Staff)", "damage": "1d4", "tradeGoods": "Stinky Cheese"},
+		{"occupation": "Cobbler", "race": "Human", "trainedWeapon": "Awl (as Dagger)", "damage": "1d4", "tradeGoods": "Shoehorn"},
+		{"occupation": "Confidence Artist", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Quality Cloak"},
+		{"occupation": "Cooper", "race": "Human", "trainedWeapon": "Crowbar (as Club)", "damage": "1d4", "tradeGoods": "Barrel"},
+		{"occupation": "Costermonger", "race": "Human", "trainedWeapon": "Knife (as Dagger)", "damage": "1d4", "tradeGoods": "Fruit"},
+		{"occupation": "Cutpurse", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Small Chest"},
+		{"occupation": "Ditchdigger", "race": "Human", "trainedWeapon": "Shovel (as Staff)", "damage": "1d4", "tradeGoods": "Fine Dirt, 1 lbs."},
+		//Humans 48 - 56 Farmer Potato to Onion
+		{"occupation": "Farmer Potato", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		{"occupation": "Farmer Wheat", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		{"occupation": "Farmer Turnip", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		{"occupation": "Farmer Corn", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		{"occupation": "Farmer Rice", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		{"occupation": "Farmer Parsnip", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		{"occupation": "Farmer Radish", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		{"occupation": "Farmer Rutabaga", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		{"occupation": "Farmer Turnip", "race": "Human", "trainedWeapon": "Pitchfork (as Spear)", "damage": "1d8", "tradeGoods": "Livestock (see notes)"},
+		// Humans 57 - 70: Fortune Teller to Jester
+		// 66 - Herder
+		{"occupation": "Fortune Teller", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Tarot Deck"},
+		{"occupation": "Gambler", "race": "Human", "trainedWeapon": "Club", "damage": "1d4", "tradeGoods": "Dice"},
+		{"occupation": "Gong Farmer", "race": "Human", "trainedWeapon": "Trowel (as Dagger)", "damage": "1d4", "tradeGoods": "Sack of Night Soil"},
+		{"occupation": "Ditcher", "race": "Human", "trainedWeapon": "Shovel (as Staff)", "damage": "1d4", "tradeGoods": "Trowel (as Dagger)"},
+		{"occupation": "Grave Digger", "race": "Human", "trainedWeapon": "Shovel (as Staff)", "damage": "1d4", "tradeGoods": "Trowel (as Dagger)"},
+		{"occupation": "Guild Beggar", "race": "Human", "trainedWeapon": "Sling", "damage": "1d4", "tradeGoods": "Crutches"},
+		{"occupation": "Beggar", "race": "Human", "trainedWeapon": "Sling", "damage": "1d4", "tradeGoods": "Crutches"},
+		{"occupation": "Healer", "race": "Human", "trainedWeapon": "Club", "damage": "1d4", "tradeGoods": "Holy Water, 1 Vial"},
+		{"occupation": "Herbalist", "race": "Human", "trainedWeapon": "Sling", "damage": "1d4", "tradeGoods": "Herbs, 1 lbs."},
+		{"occupation": "Herder", "race": "Human", "trainedWeapon": "Staff", "damage": "1d4", "tradeGoods": "Herding Dog (see notes)"},
+		{"occupation": "Hunter", "race": "Human", "trainedWeapon": "Short Bow", "damage": "1d6", "tradeGoods": "Deer Pelt"},
+		{"occupation": "Huntsman", "race": "Human", "trainedWeapon": "Short Bow", "damage": "1d6", "tradeGoods": "Deer Pelt"},
+		{"occupation": "Indentured Servant", "race": "Human", "trainedWeapon": "Staff", "damage": "1d4", "tradeGoods": "Locket"},
+		{"occupation": "Jester", "race": "Human", "trainedWeapon": "Dart", "damage": "1d4", "tradeGoods": "Silk Cloths"},
+		// Humans 71 - 80: Jeweler to Rope Maker
+		{"occupation": "Jeweler", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Gem worth 20 gp"},
+		{"occupation": "Locksmith", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Fine Tools"},
+		{"occupation": "Mendicant", "race": "Human", "trainedWeapon": "Club", "damage": "1d4", "tradeGoods": "Cheese Dip"},
+		{"occupation": "Locksmith", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Fine Tools"},
+		{"occupation": "Merchant", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "4 gp, 14 sp, 27 cp"},
+		{"occupation": "Miller/Baker", "race": "Human", "trainedWeapon": "Club", "damage": "1d4", "tradeGoods": "Flour, 1 lbs."},
+		{"occupation": "Minstrel", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Ukulele"},
+		{"occupation": "Noble", "race": "Human", "trainedWeapon": "Longsword", "damage": "1d8", "tradeGoods": "Gold Ring worth 10 gp"},
+		{"occupation": "Orphan", "race": "Human", "trainedWeapon": "Club", "damage": "1d4", "tradeGoods": "Rag Doll"},
+		{"occupation": "Ostler", "race": "Human", "trainedWeapon": "Staff", "damage": "1d4", "tradeGoods": "Bridle"},
+		{"occupation": "Rope Maker", "race": "Human", "trainedWeapon": "Knife (as Dagger)", "damage": "1d4", "tradeGoods": "Rope, 100'"},
+		// 81 - 90: Scribe to Urchin
+		{"occupation": "Scribe", "race": "Human", "trainedWeapon": "Dart", "damage": "1d4", "tradeGoods": "Parchment, 10 sheets"},
+		{"occupation": "Shaman", "race": "Human", "trainedWeapon": "Mace", "damage": "1d6", "tradeGoods": "Herbs, 1 lbs."},
+		{"occupation": "Slave", "race": "Human", "trainedWeapon": "Club", "damage": "1d4", "tradeGoods": "Strange-looking Rock"},
+		{"occupation": "Smuggler", "race": "Human", "trainedWeapon": "Sling", "damage": "1d4", "tradeGoods": "Waterproof Sack"},
+		{"occupation": "Squire", "race": "Human", "trainedWeapon": "Longsword", "damage": "1d8", "tradeGoods": "Steel Helmet"},
+		{"occupation": "Herald", "race": "Human", "trainedWeapon": "Longsword", "damage": "1d8", "tradeGoods": "Steel Helmet"},
+		{"occupation": "Tax Collector", "race": "Human", "trainedWeapon": "Longsword", "damage": "1d8", "tradeGoods": "100 cp"},
+		{"occupation": "Trapper", "race": "Human", "trainedWeapon": "Sling", "damage": "1d4", "tradeGoods": "Badger Pelt"},
+		{"occupation": "Molecatcher", "race": "Human", "trainedWeapon": "Sling", "damage": "1d4", "tradeGoods": "Mole Pelt"},
+		{"occupation": "Urchin", "race": "Human", "trainedWeapon": "Stick (as Club)", "damage": "1d4", "tradeGoods": "Begging Bowl"},
+		//91 - 96: Wainwright to Wood Seller
+		// Humans 91 -  Wainwright
+		{"occupation": "Wainwright", "race": "Human", "trainedWeapon": "Club", "damage": "1d4", "tradeGoods": "Push Cart (see notes)"},
+		{"occupation": "Weaver", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Fine Suit of Clothes"},
+		{"occupation": "Wizards Apprentice", "race": "Human", "trainedWeapon": "Dagger", "damage": "1d4", "tradeGoods": "Black Grimoire"},
+		{"occupation": "Woodcutter", "race": "Human", "trainedWeapon": "Hand Axe", "damage": "1d6", "tradeGoods": "Bundle of Wood"},
+		{"occupation": "Woodmonger", "race": "Human", "trainedWeapon": "Hand Axe", "damage": "1d6", "tradeGoods": "Bundle of Wood"},
+		{"occupation": "Wood Seller", "race": "Human", "trainedWeapon": "Hand Axe", "damage": "1d6", "tradeGoods": "Bundle of Wood"},
+		// Humans 97 - 99: Mercenary to 
+		{"occupation": "Mercenary", "race": "Human", "trainedWeapon": "Longsword", "damage": "1d8", "tradeGoods": "Hide Armour (see Armour)"},
+		{"occupation": "Outlaw", "race": "Human", "trainedWeapon": "Short Sword", "damage": "1d6", "tradeGoods": "Leather Armour (see Armour)"},
+		{"occupation": "Soldier", "race": "Human", "trainedWeapon": "Spear", "damage": "1d8", "tradeGoods": "Shield (see Armour)"}
+		];
+		return occupations[Math.floor(Math.random() * 70)]; 
+}
+	  
+
+	  
+//getLuckySign() - returns a randomly generated Lucky Sign 
+function getLuckySign(){
+    var luckySign = [
+        {"luckySign": "Harsh winter", "luckyRoll": "All attack rolls"},
+        {"luckySign": "The bull", "luckyRoll": "Melee attack rolls"},
+        {"luckySign": "Fortunate date", "luckyRoll": "Missle fire attack rolls"},
+        {"luckySign": "Raised by wolves", "luckyRoll": "Unarmed attack rolls"},
+        {"luckySign": "Conceived on horseback", "luckyRoll": "Mounted attack rolls"},
+        {"luckySign": "Born on the battlefield", "luckyRoll": "Damage rolls"},
+        {"luckySign": "Path of the bear", "luckyRoll": "Melee damage rolls"},
+        {"luckySign": "Hawkeye", "luckyRoll": "Missle damage rolls"},
+        {"luckySign": "Pack hunter", "luckyRoll": "Attack and damage rolls for 0-level starting weapon"},
+        {"luckySign": "Born under the loom", "luckyRoll": "Skill checks"},
+        {"luckySign": "Fox's cunning", "luckyRoll": "Find/disable traps"},
+        {"luckySign": "Four-leafed clover", "luckyRoll": "Find secret doors"},
+        {"luckySign": "Seventh son", "luckyRoll": "Spell checks"},
+        {"luckySign": "The raging storm", "luckyRoll": "Spell damage"},
+        {"luckySign": "Righteous heart", "luckyRoll": "Turn unholy checks"},
+        {"luckySign": "Surived the plague", "luckyRoll": "Magical healing"},
+        {"luckySign": "Luck sign", "luckyRoll": "Saving throws"},
+        {"luckySign": "Guardian angel", "luckyRoll": "Saving throws to escape traps"},
+        {"luckySign": "Survived a spider bite", "luckyRoll": "Saving throws against poison"},
+        {"luckySign": "Struck by Lightning", "luckyRoll": "Reflex saving throws"},
+        {"luckySign": "Lived through famine", "luckyRoll": "Fortitude saving throws"},
+        {"luckySign": "Resisted temptation", "luckyRoll": "Will saving throws"},
+        {"luckySign": "Charmed house", "luckyRoll": "Armour class"},
+        {"luckySign": "Speed of the Cobra", "luckyRoll": "Initiative"},
+        {"luckySign": "Bountiful Harvest", "luckyRoll": "Hits points/each level"},
+        {"luckySign": "Warrior's arm", "luckyRoll": "Critical hit tables"},
+        {"luckySign": "Unholy house", "luckyRoll": "Corruption rolls"},
+        {"luckySign": "The Broken Star", "luckyRoll": "Fumbles"},
+        {"luckySign": "Birdsong", "luckyRoll": "Number of Languages"},
+        {"luckySign": "Wild child", "luckyRoll": "Speed"}
+    ];
+	
+	//return luckySign[12];
+    return luckySign[Math.floor(Math.random() * 30)]; 
+}
+
+
+/*
+addBonusLanguages() - returns Randomly selected Cleric Bonus Languages
+*/
+function addBonusLanguages() {
+	var bonusLanguages = [
+		{"language": "Alignment Tongue"},
+		{"language": "Dwarf"},
+		{"language": "Elf"},
+		{"language": "Halfling"},
+		{"language": "Gnome"},
+		{"language": "Bugbear"},
+		{"language": "Goblin"},
+		{"language": "Gnoll"},
+		{"language": "Hobgoblin"},
+		{"language": "Kobold"},
+		{"language": "Lizardman"},
+		{"language": "Ogre"},
+		{"language": "Orc"},
+		{"language": "Serpent-man"},
+		{"language": "Doppelganger"},
+		{"language": "Dragon"},
+		{"language": "Troglodyte"},		
+		{"language": "Angelic"},		
+		{"language": "Centaur"},		
+		{"language": "Demonic"},
+		{"language": "Giant"},
+		{"language": "Pixie"}
+			];
+    return bonusLanguages[Math.floor(Math.random() * 22)]; 
+}
+
+/*
+getCleric - retreives the Cleric with the appropriate statistics for the Cleric's Level
+*/
+function getCleric() {
+	var cleric = [
+		{"level": 1,
+		 "title": "Zealot",
+		 "actionDice": "1d20",
+		 "attackBonus": 0,
+		 "critDie": "1d8",
+		 "critTable": "III",
+		 "hd": 1,
+		 "ref": 0,
+		 "fort": 1,
+		 "will": 1,
+		 "spells1": "4",
+		 "spells2": "-",
+		 "spells3": "-",
+		 "spells4": "-",
+		 "spells5": "-"},
+		
+		
+		{"level": 2,
+		 "title": "Convert",
+		 "actionDice": "1d20",
+		 "attackBonus": 1,
+		 "critDie": "1d8",
+		 "critTable": "III",
+		 "hd": 2,
+		 "ref": 0,
+		 "fort": 1,
+		 "will": 1,
+		 "spells1": "5",
+		 "spells2": "-",
+		 "spells3": "-",
+		 "spells4": "-",
+		 "spells5": "-"},
+		
+		
+		{"level": 3,
+		 "title": "Cultist",
+		 "actionDice": "1d20",
+		 "attackBonus": 2,
+		 "critDie": "1d10",
+		 "critTable": "III",
+		 "hd": 3,
+		 "ref": 1,
+		 "fort": 1,
+		 "will": 2,
+		 "spells1": "5",
+		 "spells2": "3",
+		 "spells3": "-",
+		 "spells4": "-",
+		 "spells5": "-"},
+		
+		
+		{"level": 4,
+		 "title": "Apostle",
+		 "actionDice": "1d20",
+		 "attackBonus": 2,
+		 "critDie": "1d10",
+		 "critTable": "III",
+		 "hd": 4,
+		 "ref": 1,
+		 "fort": 2,
+		 "will": 2,
+		 "spells1": "6",
+		 "spells2": "4",
+		 "spells3": "-",
+		 "spells4": "-",
+		 "spells5": "-"},
+		
+		{"level": 5,
+		 "title": "High Priest",
+		 "actionDice": "1d20",
+		 "attackBonus": 3,
+		 "critDie": "1d12",
+		 "critTable": "III",
+		 "hd": 5,
+		 "ref": 1,
+		 "fort": 2,
+		 "will": 3,
+		 "spells1": "6",
+		 "spells2": "5",
+		 "spells3": "2",
+		 "spells4": "-",
+		 "spells5": "-"},
+		
+		{"level": 6,
+		 "title": "High Priest",
+		 "actionDice": "1d20+1d14",
+		 "attackBonus": 4,
+		 "critDie": "1d12",
+		 "critTable": "III",
+		 "hd": 6,
+		 "ref": 2,
+		 "fort": 2,
+		 "will": 4,
+		 "spells1": "7",
+		 "spells2": "5",
+		 "spells3": "3",
+		 "spells4": "-",
+		 "spells5": "-"},
+	
+		{"level": 7,
+		 "title": "High Priest",
+		 "actionDice": "1d20+1d16",
+		 "attackBonus": 5,
+		 "critDie": "1d14",
+		 "critTable": "III",
+		 "hd": 7,
+		 "ref": 2,
+		 "fort": 3,
+		 "will": 4,
+		 "spells1": "7",
+		 "spells2": "6",
+		 "spells3": "4",
+		 "spells4": "1",
+		 "spells5": "-"},
+	
+		{"level": 8,
+		 "title": "High Priest",
+		 "actionDice": "1d20+1d20",
+		 "attackBonus": 5,
+		 "critDie": "1d14",
+		 "critTable": "III",
+		 "hd": 8,
+		 "ref": 2,
+		 "fort": 3,
+		 "will": 5,
+		 "spells1": "8",
+		 "spells2": "6",
+		 "spells3": "5",
+		 "spells4": "2",
+		 "spells5": "-"},		
+	
+		{"level": 9,
+		 "title": "High Priest",
+		 "actionDice": "1d20+1d20",
+		 "attackBonus": 6,
+		 "critDie": "1d16",
+		 "critTable": "III",
+		 "hd": 9,
+		 "ref": 3,
+		 "fort": 3,
+		 "will": 5,
+		 "spells1": "8",
+		 "spells2": "7",
+		 "spells3": "5",
+		 "spells4": "3",
+		 "spells5": "1"},
+	
+		{"level": 10,
+		 "title": "High Priest",
+		 "actionDice": "1d20+1d20",
+		 "attackBonus": 7,
+		 "critDie": "1d16",
+		 "critTable": "III",
+		 "hd": 10,
+		 "ref": 3,
+		 "fort": 4,
+		 "will": 6,
+		 "spells1": "9",
+		 "spells2": "7",
+		 "spells3": "6",
+		 "spells4": "4",
+		 "spells5": "2"}
+		
+		
+	];
+	
+	
+	return cleric[4]; 
+}
+	  
+/*
+addGod - adds the god that the cleric worships
+*/
+function addGod() {
+	var diety = [
+	{"god": "Ahriman", "domain": "God of Death and Disease"},
+	{"god": "Hidden Lord", "domain": "God of Secrets"},
+	{"god": "Azi Dahaka", "domain": "Demon Prince of Storms & Waste"},
+	{"god": "Bobugbubilz", "domain": "Demon Lord of Evil Amphibians"},
+	{"god": "Cadixtat", "domain": "Chaos Titan"},
+	{"god": "Nimlurun", "domain": "The unclean one, lord of filth & pollution"},
+	{"god": "Malotoch", "domain": "The Carrion Crow God"}
+	];
+	
+	return diety[Math.floor(Math.random() * 7)]; 
+}
+
+/*
+hitPointAdjustPerLevel (luckySign, luckModifier)- returns the additional/minus hit points
+the character received per level from their Stamina modifier and whether they have the Lucky Sign "Bountiful Harvest".
+*/
+function hitPointAdjustPerLevel (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign != undefined && luckySign.luckySign === "Bountiful Harvest"){
+        adjust = luckModifier;
+     }
+	return adjust;
+}
+	  
+// getBaseArmourClass(agilityModifier)- returns the base armour class of the character
+function getBaseArmourClass(agilityModifier){
+	var armourClass = 10;
+	baseArmourClass = armourClass + agilityModifier;
+	return baseArmourClass;
+}	  
+
+
+function addModifierSign (modifier) {
+	if(modifier >= 0 ) {
+		return "+" + modifier;
+	}
+	else {
+		return modifier;
+	}
+}
+	  
+/*addSign (modifier) Adds a + sign to value if value is 1 or greater.  If value is 0, then a empty String "" is returned.
+*/
+function addSign (modifier) {
+	if(modifier > 0 ) {
+		return "+" + modifier;
+	}
+	else if(modifier === 0) {
+		return "";
+	}
+	else {
+		return modifier;
+	}
+}
+	
+	  
+/*
+getBonusLanguages() returns the bonus languages that a character may have due to high intelligence or the Lucky Sign of Bird Song.  A for loop is used to prevent duplicates of languages.
+*/
+function getBonusLanguages (intelligenceModifier, luckySign, luckModifier) {
+	var bonusLanguages = 0;
+	if(bonusLanguages  != undefined && typeof bonusLanguages === 'number') {
+		bonusLanguages = intelligenceModifier;
+	}
+	else {
+		return "";
+	}
+	
+	if(luckySign != undefined && luckySign.luckySign === "Birdsong") {
+		bonusLanguages += luckModifier;
+	}
+	
+	if(bonusLanguages <=0) {
+		return "";
+	}
+	var result = ", " + addBonusLanguages().language, newLanguage = "";
+	
+	// loop
+	for(var i = 1; i < bonusLanguages; i++){
+		// 1) get a random lang
+		newLanguage = addBonusLanguages().language;
+		// 2) check the new lang is not repeative
+		if(result.indexOf(newLanguage) != -1){
+			i--;
+			// if yes continue;
+			continue;
+		} else{
+			// if not, add the new lang into the result
+			result += ", " + newLanguage;
+		}
+
+	}
+	return result;
+}
+	  
+/*
+meleeAdjust (luckySign, luckModifier) - adds bonus/penality to Melee attack based on whether the character possesses specific Lucky Signs
+*/
+function meleeAdjust (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && luckySign.luckySign === "Harsh winter"){
+        adjust = luckModifier;
+     }
+	else if (luckySign.luckySign != undefined && luckySign.luckySign === "The bull") {
+		adjust = luckModifier;
+	}
+	return adjust;
+}
+
+/*
+rangeAdjust (luckySign, luckModifier) - adds bonus/penality to Range attack based on whether the character possesses specific Lucky Signs
+*/	  
+function rangeAdjust (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && (luckySign.luckySign === "Harsh winter" || luckySign.luckySign === "Fortunate date")){
+        adjust = luckModifier;
+     }
+	return adjust;
+}
+
+/*
+adjustRef (luckySign, luckModifier) - add bonus/penality to Saving Throw based on Lucky Sign
+*/
+function adjustRef (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && (luckySign.luckySign === "Luck sign" || luckySign.luckySign === "Struck by Lightning")){
+        adjust = luckModifier;
+     }
+	return adjust;
+}
+	 
+/*
+adjustFort (luckySign, luckModifier) - add bonus/penality to Saving Throw based on Lucky Sign
+*/
+function adjustFort (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && (luckySign.luckySign === "Luck sign" || luckySign.luckySign === "Lived through famine")){
+        adjust = luckModifier;
+     }
+	return adjust;
+}
+	  
+/*
+ addLuckToSpeed (luckySign, luckModifier) adds bonuses to the character's speed if they have a positive Luck Modifier and the Lucky Sign of Wild Child
+*/
+function addLuckToSpeed (luckySign, luckModifier) {
+	var addSpeed = 0;
+	if (luckySign.luckySign != undefined && luckySign.luckySign === "Wild child" && luckModifier == 1){
+		addSpeed = 5;
+	}
+	else if (luckySign.luckySign != undefined && luckySign.luckySign === "Wild child" && luckModifier == 2){
+		addSpeed = 10;
+	}
+	else if (luckySign.luckySign != undefined && luckySign.luckySign === "Wild child" && luckModifier == 3){
+		addSpeed = 15;
+	}
+	return addSpeed;
+}
+	  
+/*
+adjustWill (luckySign, luckModifier) - add bonus/penality to Saving Throw based on Lucky Sign
+*/
+function adjustWill (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && (luckySign.luckySign === "Luck sign" || luckySign.luckySign === "Resisted temptation")){
+        adjust = luckModifier;
+     }
+	return adjust;
+}	 
+	  
+/*
+adjustInit (luckySign, luckModifier) - add bonus/penality to Initiative based on Lucky Sign
+*/
+function adjustInit (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && luckySign.luckySign === "Speed of the Cobra"){
+        adjust = luckModifier;
+     }
+	return adjust;
+}	
+
+	  
+/*
+adjustAC (luckySign, luckModifier) - add bonus/penality to AC based on Lucky Sign
+*/
+function adjustAC (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && luckySign.luckySign === "Charmed house"){
+        adjust = luckModifier;
+     }
+	return adjust;
+}	
+	  
+/*
+adjustCrit (luckySign, luckModifier) - add bonus/penality to Crit based on Lucky Sign
+*/
+function adjustCrit (luckySign, luckModifier) {
+   var adjust = luckModifier * 1;
+    if (luckySign.luckySign != undefined && luckySign.luckySign === "Warrior's arm"){
+        adjust = luckModifier * 2;
+     }
+	return adjust;
+}	
+	  
+/*
+adjustFumble (luckySign, luckModifier) - add bonus/penality to Fumble based on Lucky Sign
+*/
+function adjustFumble  (luckySign, luckModifier) {
+   var adjust = luckModifier * -1;
+    if (luckySign.luckySign != undefined && luckySign.luckySign === "The Broken Star"){
+        adjust = luckModifier * -2;
+     }
+	return adjust;
+}	
+
+	  /*
+adjustMeleeDamage  (luckySign, luckModifier) - add bonus/penality to Melee Damage based on Lucky Sign
+*/
+function adjustMeleeDamage (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && (luckySign.luckySign === "Born on the battlefield" || luckySign.luckySign === "Path of the bear")){
+        adjust = luckModifier;
+     }
+	return adjust;
+}	
+
+/*
+adjustRangeDamage  (luckySign, luckModifier) - add bonus/penality to Melee Damage based on Lucky Sign
+*/
+function adjustRangeDamage (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && (luckySign.luckySign === "Born on the battlefield" || luckySign.luckySign === "Hawkeye")){
+        adjust = luckModifier;
+     }
+	return adjust;
+}
+	  
+function adjustSpellCheck  (luckySign, luckModifier) {
+   var adjust = 0;
+    if (luckySign.luckySign != undefined && luckySign.luckySign === "Seventh son"){
+        adjust = luckModifier;
+     }
+	return adjust;
+}	
+  
+/*
+getHitsPoints (cleric, add1, add2) - retreives the number of hit points that the cleric will have based on their level (cleric), stamina modifier (add1) and Lucky Sign (add2)
+*/
+function hitPoints (cleric, add1, add2) {
+	var hd = cleric.hd;
+	var level = cleric.level;
+	var hitPoints = 0;
+	var zeroLevelHitPoints = Math.floor((Math.random() * 4) + 1) + add1 + add2;
+	var hitPointsEachLevel = Math.floor((Math.random() * 8) + 1) + add1 + add2;
+	
+	if (level === 1) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel;
+		if (hitPoints <= 4) {
+			hitPoints = 5;
+		}
+	}	
+	else if (level === 2) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel;
+		if (hitPoints <= 8) {
+			hitPoints = 9;
+		}
+	}
+	else if (level === 3) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel;
+		if (hitPoints <= 10) {
+			hitPoints = 11;
+		}
+	}
+	else if (level === 4) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel;
+		if (hitPoints <= 15) {
+			hitPoints = 16;
+		}
+	}
+	else if (level === 5) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel
+		 + hitPointsEachLevel;
+		if (hitPoints <= 18) {
+			hitPoints = 19;
+		}
+	}
+	else if (level === 6) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel
+		 + hitPointsEachLevel + hitPointsEachLevel;
+		if (hitPoints <= 22) {
+			hitPoints = 23;
+		}
+	}
+	else if (level === 7) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel
+		 + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel;
+		if (hitPoints <= 25) {
+			hitPoints = 26;
+		}
+	}
+	else if (level === 8) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel
+		 + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel;
+		if (hitPoints <= 28) {
+			hitPoints = 29;
+		}
+	}
+	else if (level === 9) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel
+		 + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel;
+		if (hitPoints <= 30) {
+			hitPoints = 31;
+		}
+	}
+	else if (level === 10) {
+		hitPoints = zeroLevelHitPoints + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel
+		 + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel + hitPointsEachLevel;
+		if (hitPoints <= 34) {
+			hitPoints = 35;
+		}
+	}
+	return hitPoints;
+}	  
+	  
+  
+        var imgData = "images/dcc_cleric.png";
+        $("#character_sheet").attr("src", imgData);
+      
+
+	  var data = Character();
+		 
+		  
+      $("#name").html(data.name);  
+      $("#title").html(data.title);
+	  
+      $("#strength").html(data.strength);
+      $("#strengthMod").html(addModifierSign(data.strengthModifier));
+      
+      $("#agility").html(data.agility);
+      $("#agilityMod").html(addModifierSign(data.agilityModifier));
+      
+      $("#stamina").html(data.stamina);
+      $("#staminaMod").html(addModifierSign(data.staminaModifier));
+      
+      $("#personality").html(data.personality);
+      $("#personalityMod").html(addModifierSign(data.personalityModifier));
+      
+      $("#intelligence").html(data.intelligence);
+      $("#intelligenceMod").html(addModifierSign(data.intelligenceModifier));
+      
+      $("#luck").html(data.luck);
+      $("#luckMod").html(addModifierSign(data.luckModifier));
+      
+      $("#occupation").html(data.occupation);
+      
+      $("#luckySignNotes").html(data.luckySign);
+      $("#luckyRoll").html(data.luckyRoll);
+      $("#luckySignBonus").html(addModifierSign(data.luckySignBonus));
+      
+      $("#level").html(data.level);
+      $("#baseLanguages").html(data.baseLanguages);
+      $("#bonusLanguages").html(data.bonusLanguages);
+      
+      $("#clericGod").html(data.clericGod);
+      $("#holyWeapons").html(data.holyWeapons);
+      $("#unholyCreatures").html(data.unholyCreatures);
+      
+      $("#baseArmourClass").html(data.baseArmourClass);
+      $("#alignment").html(data.alignment);
+      
+      $("#zeroWeapon").html(data.zeroWeapon);
+      
+      $("#hitPoints").html(data.hitPoints);
+      
+      
+      $("#ref").html(addModifierSign(data.ref));
+      $("#fort").html(addModifierSign(data.fort));
+      $("#will").html(addModifierSign(data.will));
+      
+      $("#init").html(addModifierSign(data.init));
+      $("#melee").html(addModifierSign(data.melee));
+      $("#range").html(addModifierSign(data.range));
+      $("#fumbleDie").html(data.fumbleDie);
+      $("#speed").html(data.speed);
+      
+      $("#critDie").html(data.critDie);
+      $("#critTable").html(data.critTable);
+      $("#actionDie").html(data.actionDie);
+      
+      $("#layOnHandsLaw").html(data.layOnHandsLaw);
+      $("#layOnHandsNeutral").html(data.layOnHandsNeutral);
+      $("#layOnHandsChaos").html(data.layOnHandsChaos);
+      
+      $("#spellCheck").html(data.spellCheck);
+      $("#level1Spells").html(data.level1Spells);
+      $("#level2Spells").html(data.level2Spells);
+      $("#level3Spells").html(data.level3Spells);
+      $("#level4Spells").html(data.level4Spells);
+      $("#level5Spells").html(data.level5Spells);
+
+
+  </script>
+		
+	
+    
+</body>
+</html>
